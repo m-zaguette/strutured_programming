@@ -1,0 +1,219 @@
+//Implementacaoo do Método dos Trapézios
+//Nome: Marcelo Zaguette Junior	RA: 180998
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+
+void aloca_float(float **p, int tam);
+
+void recebe_funcao(float *pcoef, float *pexpo, int tam);
+
+void recebe_intervalo(float *intervalo, int tam);
+
+void resolve_simples(float *pfx,float *pcoef, float *pexpo, float *intervalo, float h, int qvezes, int grau);
+
+void regra_simples(float *it,float *pfx,float h,int x);
+
+void imprime_simples(float *pfx, float *in,int qvezes);
+
+void passar_intervalo(float *inter, float *intervalo, float ad, int qvezes);
+
+void resolve_repetida(float *inter, float *pfx, float *pcoef, float *pexpo, int qvezes, int grau);
+
+void imprimir_repetida(float *inter, float *pfx, int qvezes);
+
+void regra_repetida(float *it, float *pfx, float h, int qvezes);
+
+
+int main(){
+	
+	float *pcoef=NULL;	float *pexpo=NULL;	float *pfx=NULL;
+	float intervalo[2]; float *inter = NULL;
+	float h=0;	float it=0;	float ad=0;
+	int grau=0;	int n=0;	int qvezes=0;
+	char parar;
+	
+			
+		printf("\nDigite o grau do polinomio: ");
+		scanf("%i",&grau);
+		fflush(stdin);
+		
+		grau++;
+		
+		aloca_float(&pcoef,grau);
+		aloca_float(&pexpo,grau);
+		
+		recebe_funcao(pcoef,pexpo,grau);
+		
+		recebe_intervalo(intervalo,2);
+		
+		h = intervalo[1]-intervalo[0];
+	do{
+		printf("\nDigite quantas bases : ");
+		scanf("%i",&n);
+		fflush(stdin);
+		
+		h = (intervalo[1]-intervalo[0])/n;
+		printf("O valor de h \x82: %.4f\n",h);
+		
+		if(n==1){
+			qvezes=n+1;
+			aloca_float(&pfx,qvezes);
+			
+			resolve_simples(pfx,pcoef,pexpo,intervalo,h,qvezes,grau);
+			
+			imprime_simples(pfx,intervalo,qvezes);
+			
+			regra_simples(&it,pfx,h,qvezes);
+	
+			printf("IT = %.4f\n",it);
+			
+		}else{
+			qvezes=n+1;
+			ad = h;
+			//qvezes++;
+			
+			aloca_float(&pfx,qvezes);
+			
+			aloca_float(&inter,qvezes);
+			
+			passar_intervalo(inter,intervalo,ad,qvezes);
+					
+			resolve_repetida(inter,pfx,pcoef,pexpo,qvezes,grau);
+			
+			imprimir_repetida(inter,pfx,qvezes);
+			
+			regra_repetida(&it,pfx,h,qvezes);
+			
+			printf("ITR = %.4f\n",it);
+		}
+		
+		printf("\nDeseja Continuar? <s/n>: ");
+		scanf("%c",&parar);
+		fflush(stdin);
+		printf("\n");
+		
+	}while(parar!='n' && parar!='N');
+	
+	printf("Obrigado por usar nossas solucoes para facilitar seus calculos :-)\n");
+
+	return 0;
+}
+
+void aloca_float(float **p, int tam){
+	if((*p = (float*) realloc (*p, tam*sizeof(float)))==NULL){
+		printf("\nDeu ruim a alocacao campeao\n");
+		exit(1);
+	}
+}
+
+void recebe_funcao(float *pcoef, float *pexpo, int tam){
+	int i=0;
+	for(i = 0; i<tam; i++){
+		//printf("\nDigite o valor do %io coeficiente e do %io expoente de x <coef*x^expo> (separados por espaco e da esqueda para a direita) : ",i+1,i+1);
+		printf("\nDigite o coeficiente de x^%i: ",i);
+		//scanf("%f %f",(pcoef+i),(pexpo+i));
+		scanf("%f",(pcoef+i));
+		*(pexpo+i) = i;
+		
+		fflush(stdin);
+	}
+}
+
+void recebe_intervalo(float *intervalo, int tam){
+	int i=0;
+	float aux=0;
+	float aux1=0;
+	
+	printf("\nDigite o valor do %i intervalo (da esqueda para a direita) : ",i+1);
+	scanf("%f",&aux);
+	fflush(stdin);
+	printf("\nDigite o valor do %i intervalo (da esqueda para a direita) : ",i+2);
+	scanf("%f",&aux1);
+	fflush(stdin);
+	if(aux<aux1){
+		*(intervalo) = aux;
+		*(intervalo+1) = aux1;
+	}else{
+		*(intervalo) = aux1;
+		*(intervalo+1) = aux;
+	}
+}
+
+void resolve_simples(float *pfx,float *pcoef, float *pexpo, float *intervalo, float h, int qvezes, int grau){
+	int i=0;
+	int j=0;
+	for(i=0;i<qvezes;i++){
+		for(j=0;j<grau;j++){
+			if((*pfx+i)!=0 && j==0){
+				*(pfx+i) = 0;
+			}
+			*(pfx+i) += *(pcoef+j) * pow((*(intervalo+i)),*(pexpo+j));
+		}
+	}
+}
+
+void imprime_simples(float *pfx, float *in, int qvezes){
+	int i=0;
+	for(i=0;i<qvezes;i++){
+		printf("Valor da f(%.4f) = %.4f\n",*(in+i),*(pfx+i));
+	}
+}
+
+void regra_simples(float *it,float *pfx,float h,int qvezes){
+	int i=0;
+	float aux=0;
+	for(i=0;i<qvezes;i++){
+		aux+= *(pfx+i);
+	}
+	*it = (h/2) * aux;
+}
+
+void passar_intervalo(float *inter, float *intervalo, float ad, int qvezes){
+	int i=0;
+	float aux = ad;
+	for(i=0;i<qvezes;i++){
+		if(i==0){
+			*(inter+i) = *(intervalo+i);
+		}else{
+			*(inter+i) = aux + *(intervalo+0);
+			aux += ad;
+		}
+	}
+}
+
+void resolve_repetida(float *inter, float *pfx, float *pcoef, float *pexpo, int qvezes, int grau){
+	int i=0;	int j=0;
+	for(i=0;i<qvezes;i++){
+		for(j=0;j<=grau-1;j++){
+			if((*pfx+i)!=0 && j==0){
+				*(pfx+i) = 0;
+				//printf("Teve que zerar\n");
+				//printf("%.2f += %.2f * %.2f^%.2f\n",*(pfx+i),*(pcoef+j),*(inter+i),*(pexpo+j));
+			}
+			//printf("%.4f += %.2f * %.2f^%.2f\n",*(pfx+i),*(pcoef+j),*(inter+i),*(pexpo+j));
+			*(pfx+i) += (*(pcoef+j)) * pow((*(inter+i)),*(pexpo+j));
+		}
+	}
+}
+
+void imprimir_repetida(float *inter, float *pfx, int qvezes){
+	int i=0;
+	for(i=0;i<qvezes;i++){
+		printf("Valor da f(%.4f) = %.4f\n",*(inter+i),*(pfx+i));
+	}
+}
+
+void regra_repetida(float *it, float *pfx, float h, int qvezes){
+	int i=0;
+	float aux=0;
+	float aux2=0;
+	for(i=1;i<qvezes-1;i++){
+		aux2 += *(pfx+i);
+	}
+	aux2 *= 2;
+	aux = *(pfx+0) + *(pfx+qvezes-1);
+	
+	*it = (h/2) * (aux+aux2);
+}
